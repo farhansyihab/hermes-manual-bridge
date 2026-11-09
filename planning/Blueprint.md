@@ -20,6 +20,9 @@
 - alat editing : `featherpad` dan `Visual Studio Code`
 - Hardware : Acer E-14 E5-475G-38LQ RAM masih 4GB
 - Processor intel Core i3-600U(2.0 GHz, 3MB L3 Cache)
+- push url repo : "https://github.com/farhansyihab/hermes-manual-bridge.git"
+- gh sudah terinstal dan sudah login github via terminal
+- sudah jalankan `gh auth setup-git`
 
 ## 3. Arsitektur Sistem & Diagram Alur
 Sistem terdiri dari 3 entitas utama: **Hermes Agent (Klien)**, **Middleware FastAPI (Server & UI)**, dan **User/DeepSeek Browser (Eksternal)**.
@@ -93,8 +96,8 @@ sequenceDiagram
 
 ### 🟢 Fase 1: Foundation (MVP) - **STATUS: SETUP HERMES SELESAI**
 - [x] **Install & Konfigurasi Hermes Agent (v0.23.0)**: Sudah selesai. Endpoint diarahkan ke `http://localhost:8000/v1` dengan model `deepseek-manual`.
-- [ ] Setup environment Python & install FastAPI, Uvicorn untuk Middleware.
-- [ ] Implementasi Endpoint `POST /v1/chat/completions` dengan mekanisme `asyncio.Event` (Hold & Wait).
+- [x] Setup environment Python & install FastAPI, Uvicorn untuk Middleware.
+- [x] Implementasi Endpoint `POST /v1/chat/completions` dengan mekanisme `asyncio.Event` (Hold & Wait).
 - [ ] Implementasi Web UI dasar (HTML/JS) untuk melihat prompt dan submit respons.
 - [ ] Testing alur penuh: Hermes -> Middleware -> Browser -> Middleware -> Hermes.
 
