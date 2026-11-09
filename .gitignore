@@ -1,0 +1,79 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environment (JANGAN di-commit, terlalu besar)
+venv/
+.venv/
+env/
+ENV/
+
+# ============================================
+# Secrets & Konfigurasi Sensitif
+# ============================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.secret
+secrets/
+
+# ============================================
+# Hermes Agent (jika ada di root project)
+# ============================================
+.hermes/
+hermes_state/
+hermes_logs/
+*.log
+
+# ============================================
+# State & Data Sementara Middleware
+# ============================================
+state/
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# IDE & Editor
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Testing & Coverage
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ============================================
+# Node (jika nanti ada frontend build)
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
