@@ -316,7 +316,7 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 ### 🟡 Fase 2: Robustness & UX (Peningkatan Kualitas) — STATUS: 🔲 BELUM DIMULAI
 
 - [x] Tambahkan fitur Riwayat (History Log): Menyimpan percakapan ke file JSON/SQLite lokal.
-- [ ] Tambahkan Syntax Highlighting di Textarea (CodeMirror/Prism) agar kode dari DeepSeek mudah dibaca.
+- [x] Tambahkan Syntax Highlighting di Textarea (CodeMirror/Prism) agar kode dari DeepSeek mudah dibaca.
 - [ ] Implementasi Edit Prompt: Memungkinkan user mengedit prompt Hermes sebelum dikirim ke DeepSeek.
 - [ ] Tambahkan notifikasi suara/browser saat prompt baru masuk.
 - [ ] Tambahkan fitur "Clear Draft" untuk menghapus draft jawaban yang tersimpan di localStorage.
