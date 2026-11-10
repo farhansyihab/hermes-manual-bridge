@@ -35,9 +35,17 @@ def get_db():
         conn.close()
 
 
+def _column_exists(conn, table: str, column: str) -> bool:
+    """Cek apakah kolom sudah ada di tabel (untuk migration aman)"""
+    cursor = conn.execute(f"PRAGMA table_info({table})")
+    columns = [row["name"] for row in cursor.fetchall()]
+    return column in columns
+
+
 def init_db():
     """Inisialisasi database dan buat tabel jika belum ada"""
     with get_db() as conn:
+        # Buat tabel utama
         conn.execute("""
             CREATE TABLE IF NOT EXISTS conversations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,11 +55,22 @@ def init_db():
                 status TEXT NOT NULL DEFAULT 'completed',
                 model TEXT,
                 prompt_tokens INTEGER DEFAULT 0,
-                completion_tokens INTEGER DEFAULT 0
+                completion_tokens INTEGER DEFAULT 0,
+                original_prompt TEXT
             )
         """)
+
+        # Migration: tambahkan kolom original_prompt jika belum ada
+        # (untuk database yang sudah dibuat sebelum fitur Edit Prompt)
+        if not _column_exists(conn, "conversations", "original_prompt"):
+            conn.execute("""
+                ALTER TABLE conversations
+                ADD COLUMN original_prompt TEXT
+            """)
+            print("[DB] Kolom 'original_prompt' ditambahkan via migration")
+
         # Index untuk query cepat
         conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_timestamp
             ON conversations(timestamp DESC)
         """)

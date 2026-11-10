@@ -63,6 +63,26 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Header box dengan tombol edit di kanan */
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.box-header label {
+    margin-bottom: 0;
+}
+
+.prompt-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 label {
     display: block;
     font-weight: bold;
@@ -85,6 +105,13 @@ textarea {
 textarea[readonly] {
     background-color: #f8f9fa;
     color: #495057;
+}
+
+/* Style khusus saat textarea dalam mode edit */
+textarea.editing {
+    background-color: #fffbea;
+    border: 2px solid #ffc107;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
 }
 
 button {
@@ -150,7 +177,49 @@ button:disabled {
     display: block;
 }
 
-/* History Styles */
+/* === Badge "Edited" - indikator prompt telah dimodifikasi === */
+.edited-badge {
+    display: inline-block;
+    background-color: #ffc107;
+    color: #212529;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* === Tombol kecil untuk aksi === */
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* === History Styles === */
 .history-item {
     background: white;
     padding: 1rem;
@@ -217,25 +286,23 @@ button:disabled {
     overflow-y: auto;
 }
 
-.btn-small {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
+/* Style khusus untuk prompt asli (sebelum diedit) - dengan border kiri oranye */
+.history-content.history-original {
+    background: #fff8e1;
+    border-left: 4px solid #ffc107;
 }
 
-.btn-danger {
-    background-color: #dc3545;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
+/* Tag "Edited" di list history */
+.history-edited-tag {
+    display: inline-block;
+    background-color: #ffc107;
+    color: #212529;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+    vertical-align: middle;
 }
 
 .history-actions {
@@ -250,7 +317,7 @@ button:disabled {
     color: #999;
 }
 
-/* Syntax Highlighting Preview */
+/* === Syntax Highlighting Preview === */
 .preview-container {
     margin-top: 1rem;
     border: 1px solid #ddd;

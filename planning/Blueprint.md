@@ -313,12 +313,12 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 - [x] Konfigurasi SSH Git untuk push tanpa password ke GitHub.
 - [x] Commit dan push progress ke repository GitHub.
 
-### 🟡 Fase 2: Robustness & UX (Peningkatan Kualitas) — STATUS: 🔲 BELUM DIMULAI
+### 🟡 Fase 2: Robustness & UX (Peningkatan Kualitas) — STATUS: 🔲 SEDANG DIKERJAKAN
 
 - [x] Tambahkan fitur Riwayat (History Log): Menyimpan percakapan ke file JSON/SQLite lokal.
 - [x] Tambahkan Syntax Highlighting di Textarea (CodeMirror/Prism) agar kode dari DeepSeek mudah dibaca.
-- [ ] Implementasi Edit Prompt: Memungkinkan user mengedit prompt Hermes sebelum dikirim ke DeepSeek.
-- [ ] Tambahkan notifikasi suara/browser saat prompt baru masuk.
+- [x] Implementasi Edit Prompt: Memungkinkan user mengedit prompt Hermes sebelum dikirim ke DeepSeek.
+- [ ] Tambahkan notifikasi suara/browser saat prompt baru masuk. --> bagian ini belum diperlukan
 - [ ] Tambahkan fitur "Clear Draft" untuk menghapus draft jawaban yang tersimpan di localStorage.
 
 ### 🟠 Fase 3: Advanced Agent Control (Parsing Otomatis) — STATUS: 🔲 BELUM DIMULAI
