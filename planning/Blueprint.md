@@ -326,7 +326,7 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 **Fokus:** Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke Hermes.
 
 - [ ] **Modul D: Code Parser & Path Extractor**
-  - [ ] Implementasi fungsi `extract_code_blocks()` untuk deteksi blok kode.
+  - [x] Implementasi fungsi `extract_code_blocks()` untuk deteksi blok kode.
   - [ ] Implementasi fungsi `extract_file_path_from_prompt()` untuk ekstrak path dari prompt Hermes.
   - [ ] Implementasi fungsi `build_tool_call_response()` untuk bungkus ke format OpenAI tool call.
   - [ ] Unit test untuk berbagai pola prompt dan respons.
