@@ -195,6 +195,11 @@ button:disabled {
     font-size: 0.85rem;
 }
 
+.btn-tiny {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+}
+
 .btn-danger {
     background-color: #dc3545;
 }
@@ -219,7 +224,305 @@ button:disabled {
     background-color: #218838;
 }
 
-/* === History Styles === */
+.btn-disabled {
+    background-color: #adb5bd !important;
+    cursor: not-allowed !important;
+}
+
+/* =========================================================
+   MODUL E: SANDBOX APPROVAL PANEL STYLES
+   ========================================================= */
+
+.approval-panel {
+    margin-top: 1.5rem;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.approval-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.approval-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.approval-icon {
+    font-size: 1.2rem;
+}
+
+.approval-details {
+    padding: 1rem;
+}
+
+/* File Info Grid */
+.file-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-item label {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0;
+}
+
+.info-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.file-name {
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    color: #007bff;
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+
+.file-name.no-path {
+    color: #dc3545;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+
+.file-name-input {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+/* Path Source Badge */
+.path-source-badge {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white;
+}
+
+.path-source-badge.source-explicit {
+    background-color: #28a745;
+}
+
+.path-source-badge.source-natural_language {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.path-source-badge.source-manual {
+    background-color: #dc3545;
+}
+
+/* Language Badge */
+.language-badge {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background-color: #6c757d;
+    color: white;
+    text-transform: lowercase;
+}
+
+/* Code Preview Section */
+.code-preview-section {
+    margin-top: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.code-preview-section .preview-header {
+    background: #2d2d2d;
+    color: white;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.code-preview-section .preview-content {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #2d2d2d;
+}
+
+.code-preview-section pre {
+    margin: 0;
+    padding: 1rem;
+    background: #2d2d2d;
+}
+
+.code-preview-section code {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.code-edit-area {
+    width: 100%;
+    min-height: 300px;
+    padding: 1rem;
+    border: none;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.code-edit-area:focus {
+    outline: 2px solid #007bff;
+}
+
+/* Warnings Section */
+.approval-warnings {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+}
+
+.warning-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+}
+
+.warning-item + .warning-item {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.warning-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.warning-danger {
+    background: #f8d7da;
+    border-left-color: #dc3545;
+}
+
+/* Approval Actions */
+.approval-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+}
+
+.btn-approval {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+.btn-approve {
+    background-color: #28a745;
+}
+
+.btn-approve:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.btn-edit-approve {
+    background-color: #17a2b8;
+}
+
+.btn-edit-approve:hover:not(:disabled) {
+    background-color: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.3);
+}
+
+.btn-reject {
+    background-color: #dc3545;
+}
+
+.btn-reject:hover:not(:disabled) {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.btn-approval:disabled {
+    background-color: #adb5bd !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* =========================================================
+   History Styles
+   ========================================================= */
+
 .history-item {
     background: white;
     padding: 1rem;
@@ -317,7 +620,10 @@ button:disabled {
     color: #999;
 }
 
-/* === Syntax Highlighting Preview === */
+/* =========================================================
+   Syntax Highlighting Preview (legacy - masih dipakai)
+   ========================================================= */
+
 .preview-container {
     margin-top: 1rem;
     border: 1px solid #ddd;
@@ -364,4 +670,28 @@ button:disabled {
     padding: 2rem;
     color: #999;
     font-style: italic;
+}
+
+/* =========================================================
+   Responsive Design
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .file-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .approval-actions {
+        flex-direction: column;
+    }
+
+    .btn-approval {
+        width: 100%;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 }

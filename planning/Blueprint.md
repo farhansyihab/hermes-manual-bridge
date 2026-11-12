@@ -412,17 +412,17 @@ Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke He
   - [x] Update `~/.hermes/config.yaml` dengan system prompt yang menginstruksikan format `[FILE: path]`.
   - [x] Test bahwa Hermes Agent mematuhi format baru.
 
-- [ ] **Modul D: Code Parser & Path Extractor**
+- [x] **Modul D: Code Parser & Path Extractor**
   
   - [x] Implementasi fungsi `extract_code_blocks()` untuk deteksi blok kode.
   - [x] Implementasi fungsi `extract_file_path_from_prompt()` untuk ekstrak path dari prompt Hermes **dengan prioritas format eksplisit `[FILE: path]` (Instruct Hermes), dilengkapi fallback regex natural language dan dialog input manual.**
   - [x] Implementasi fungsi `detect_path_source()` untuk indikator UI (sumber path).
   - [x] Implementasi fungsi `build_tool_call_response()` untuk bungkus ke format OpenAI tool call.
-  - [ ] Unit test untuk berbagai pola prompt dan respons (eksplisit, NL, fallback).
+  - [x] Unit test untuk berbagai pola prompt dan respons (eksplisit, NL, fallback).
 
 - [ ] **Modul E: Sandbox Approval UI**
   
-  - [ ] Tambahkan panel preview di Web UI yang muncul saat kode terdeteksi.
+  - [x] Tambahkan panel preview di Web UI yang muncul saat kode terdeteksi.
   - [ ] Tampilkan informasi: nama file, **sumber path (Eksplisit/NL/Manual)**, bahasa, ukuran, isi kode.
   - [ ] Implementasi tombol "Izinkan", "Edit & Izinkan", "Tolak".
   - [ ] Implementasi editable preview (user bisa modifikasi kode sebelum approve).
