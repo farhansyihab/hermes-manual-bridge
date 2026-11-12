@@ -74,6 +74,7 @@ planning/LaporanSelesai/
 middleware/test/
 LaporanSelesai/
 test/
+planning/
 
 # ============================================
 # Node (jika nanti ada frontend build)
