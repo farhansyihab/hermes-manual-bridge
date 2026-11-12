@@ -2,7 +2,6 @@
    Hermes Manual Bridge - Main Stylesheet
    Dipisahkan dari ui.py agar lebih mudah dirawat.
    ========================================================= */
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     max-width: 900px;
@@ -232,7 +231,6 @@ button:disabled {
 /* =========================================================
    MODUL E: SANDBOX APPROVAL PANEL STYLES
    ========================================================= */
-
 .approval-panel {
     margin-top: 1.5rem;
     border: 2px solid #007bff;
@@ -522,6 +520,23 @@ button:disabled {
 /* =========================================================
    History Styles
    ========================================================= */
+.history-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.history-title {
+    margin: 0;
+}
+
+.history-toolbar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
 
 .history-item {
     background: white;
@@ -589,7 +604,7 @@ button:disabled {
     overflow-y: auto;
 }
 
-/* Style khusus untuk prompt asli (sebelum diedit) - dengan border kiri oranye */
+/* Style khusus untuk prompt asli (sebelum diedit) */
 .history-content.history-original {
     background: #fff8e1;
     border-left: 4px solid #ffc107;
@@ -623,7 +638,6 @@ button:disabled {
 /* =========================================================
    Syntax Highlighting Preview (legacy - masih dipakai)
    ========================================================= */
-
 .preview-container {
     margin-top: 1rem;
     border: 1px solid #ddd;
@@ -675,7 +689,6 @@ button:disabled {
 /* =========================================================
    Responsive Design
    ========================================================= */
-
 @media (max-width: 600px) {
     .file-info-grid {
         grid-template-columns: 1fr;
