@@ -26,11 +26,11 @@ Pertimbangan biaya dan efisiensi resource. Hermes Agent adalah alternatif open-s
 
 Berdasarkan evaluasi kebutuhan dan pengalaman pengguna dengan aplikasi C++/FLTK sebelumnya, diputuskan:
 
-| Aspek | Keputusan | Alasan |
-| --- | --- | --- |
-| Parsing Kode | Middleware Otomatis Parsing | Middleware mendeteksi blok kode dalam respons DeepSeek secara otomatis, mengekstrak konten, dan mengirimkannya sebagai tool call ke Hermes. User tidak perlu mengetik JSON manual. |
-| Penentuan Path File | **Opsi A: Instruct Hermes** via format eksplisit `[FILE: path]` | Hermes di-instruct melalui system prompt untuk selalu menyebutkan path target dengan format `[FILE: path]` di awal permintaan. Middleware memprioritaskan format ini (reliabilitas ~95%+), dengan fallback regex natural language dan dialog manual jika gagal. |
-| Mode Operasi | Hybrid dengan Preview | Middleware menampilkan preview hasil parsing di Web UI sebelum mengirim ke Hermes, memberikan user kontrol penuh atas apa yang akan ditulis ke hardisk. |
+| Aspek               | Keputusan                                               | Alasan                                                                                                                                                                                                                                                          |
+| ------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parsing Kode        | Middleware Otomatis Parsing                             | Middleware mendeteksi blok kode dalam respons DeepSeek secara otomatis, mengekstrak konten, dan mengirimkannya sebagai tool call ke Hermes. User tidak perlu mengetik JSON manual.                                                                              |
+| Penentuan Path File | **Instruct Hermes** via format eksplisit `[FILE: path]` | Hermes di-instruct melalui system prompt untuk selalu menyebutkan path target dengan format `[FILE: path]` di awal permintaan. Middleware memprioritaskan format ini (reliabilitas ~95%+), dengan fallback regex natural language dan dialog manual jika gagal. |
+| Mode Operasi        | Hybrid dengan Preview                                   | Middleware menampilkan preview hasil parsing di Web UI sebelum mengirim ke Hermes, memberikan user kontrol penuh atas apa yang akan ditulis ke hardisk.                                                                                                         |
 
 ---
 
@@ -46,12 +46,12 @@ sequenceDiagram
     participant M as Middleware (FastAPI localhost:8000)
     participant U as User (Anda)
     participant D as DeepSeek (Browser)
-    
+
     Note over H, M: Fase 1: Hermes Mengirim Tugas
     H->>M: POST /v1/chat/completions (Payload JSON OpenAI-compatible)
     M->>M: Simpan Prompt ke State & Kunci Koneksi (Async Wait)
     M-->>H: (Koneksi Ditahan/Blocking, HTTP 200 Pending)
-    
+
     Note over M, U: Fase 2: User Menganalisis & Copy-Paste
     U->>M: Buka http://localhost:8000 (Web UI)
     M-->>U: Tampilkan Prompt di Textarea 1
@@ -59,7 +59,7 @@ sequenceDiagram
     U->>D: Copy Prompt -> Paste ke DeepSeek Chat
     D-->>U: Generate Jawaban AI
     U->>U: Copy Jawaban DeepSeek
-    
+
     Note over M, U: Fase 3: User Mengirim Balik & Selesai
     U->>M: Paste Jawaban di Textarea 2 -> Klik "Kirim"
     M->>M: Buka Kunci Koneksi (Async Release)
@@ -76,17 +76,17 @@ sequenceDiagram
     participant M as Middleware + Parser
     participant U as User (Anda)
     participant D as DeepSeek (Browser)
-    
+
     Note over H, M: Langkah 1: Hermes Minta Buat File (dengan format [FILE: path])
     H->>M: POST /v1/chat/completions<br/>Prompt: "[FILE: hello.py] Buatkan file yang mencetak Halo"
     M->>M: Simpan prompt + ekstrak path target (Prioritas 1: regex [FILE: path])
     M->>M: Kunci koneksi (asyncio.Event)
-    
+
     Note over M, U: Langkah 2: User Copy-Paste ke DeepSeek
     U->>M: Lihat prompt di Web UI
     U->>D: Copy prompt -> Paste ke DeepSeek
     D-->>U: Generate jawaban berisi blok kode Python
-    
+
     Note over M, U: Langkah 3: User Paste Jawaban ke Middleware
     U->>M: Paste jawaban DeepSeek ke Textarea 2
     M->>M: DETEKSI OTOMATIS:
@@ -94,13 +94,13 @@ sequenceDiagram
     M->>M: 2. Regex cari path dari prompt (hierarki: [FILE:] → NL → manual)
     M->>M: 3. Tampilkan PREVIEW di Web UI
     M-->>U: Tampilkan: "Hermes ingin menulis file hello.py. Sumber: [Eksplisit]. Izinkan?"
-    
+
     Note over M, U: Langkah 4: User Approve
     U->>M: Klik "Izinkan & Kirim"
     M->>M: Bungkus kode ke JSON tool call OpenAI
     M->>M: Buka kunci koneksi
     M-->>H: Kirim JSON dengan tool_calls: [{name: "write_file", ...}]
-    
+
     Note over H: Langkah 5: Hermes Eksekusi
     H->>H: Parse tool call
     H->>H: Execute write_file(path="hello.py", content="...")
@@ -111,17 +111,17 @@ sequenceDiagram
 
 ## 3. Stack Teknologi & Konfigurasi Saat Ini
 
-| Komponen | Detail |
-| --- | --- |
-| Klien (Agent) | Hermes Agent v0.23.0 (Nous Research) |
-| Manager | uv (v0.13.5) |
-| Config Hermes | `~/.hermes/config.yaml` & `~/.hermes/.env` |
-| Endpoint Target | `http://localhost:8000/v1` (Chat Completions mode) |
-| Model Name | `deepseek-manual` (Custom display name) |
-| Backend Middleware | Python 3.12.3, FastAPI, Uvicorn (ASGI Server) |
-| Frontend (Web UI) | HTML5, CSS3, Vanilla JavaScript (disajikan langsung oleh FastAPI) |
-| State Management | `asyncio.Event` (Python built-in) untuk mekanisme hold & wait |
-| Parser Engine | `re` (Python regex built-in) untuk ekstraksi kode dan path |
+| Komponen           | Detail                                                            |
+| ------------------ | ----------------------------------------------------------------- |
+| Klien (Agent)      | Hermes Agent v0.23.0 (Nous Research)                              |
+| Manager            | uv (v0.13.5)                                                      |
+| Config Hermes      | `~/.hermes/config.yaml` & `~/.hermes/.env`                        |
+| Endpoint Target    | `http://localhost:8000/v1` (Chat Completions mode)                |
+| Model Name         | `deepseek-manual` (Custom display name)                           |
+| Backend Middleware | Python 3.12.3, FastAPI, Uvicorn (ASGI Server)                     |
+| Frontend (Web UI)  | HTML5, CSS3, Vanilla JavaScript (disajikan langsung oleh FastAPI) |
+| State Management   | `asyncio.Event` (Python built-in) untuk mekanisme hold & wait     |
+| Parser Engine      | `re` (Python regex built-in) untuk ekstraksi kode dan path        |
 
 ### Konfigurasi Hermes Saat Ini
 
@@ -142,19 +142,19 @@ Untuk meningkatkan reliabilitas parsing path dari ~70% menjadi ~95%+, Hermes Age
 agent:
   system_prompt: |
     Kamu adalah asisten yang membantu user membuat file kode.
-    
+
     PENTING: Setiap kali kamu meminta pembuatan file, WAJIB awali 
     permintaan dengan format eksplisit:
-    
+
     [FILE: path/ke/file.ext]
-    
+
     Contoh:
     [FILE: scripts/backup.sh]
     Buatkan bash script untuk backup database MySQL...
-    
+
     [FILE: src/utils/helpers.py]
     Buatkan modul helper untuk validasi input...
-    
+
     Format ini membantu middleware mendeteksi target file dengan akurat.
     Jika tidak ada format [FILE: ...], middleware akan meminta user 
     memasukkan path secara manual.
@@ -165,11 +165,13 @@ agent:
 ## 4. Modul & Fitur Inti
 
 ### Modul A: Mock OpenAI API Gateway ✅ (SELESAI)
+
 - **Endpoint:** `POST /v1/chat/completions`
 - **Fungsi:** Menerima payload JSON standar OpenAI dari Hermes Agent. Mengekstrak pesan terakhir (`messages[-1].content`).
 - **Mekanisme Kunci:** Menggunakan `asyncio.Event` untuk "menahan" respons HTTP hingga user menekan tombol submit di Web UI.
 
 ### Modul B: Web UI Dashboard ✅ (SELESAI)
+
 - **Endpoint:** `GET /` (Root)
 - **Fungsi:** Menyajikan antarmuka visual untuk user.
 - **Komponen UI:**
@@ -180,10 +182,12 @@ agent:
   - Polling: Script JS melakukan polling setiap 2 detik ke `/get_prompt`.
 
 ### Modul C: State & Data Handler ✅ (SELESAI)
+
 - **Endpoint:** `GET /get_prompt` & `POST /submit_response`
 - **Fungsi:** Mengelola pertukaran data antara Web UI (User) dan API Gateway (Hermes).
 
 ### Modul D: Code Parser & Path Extractor 🟡 (FASE 3)
+
 - **Fungsi:** Otomatis mendeteksi blok kode dalam respons DeepSeek dan mengekstrak path file dari prompt Hermes.
 - **Komponen:**
   - **Code Detector:** Regex untuk mendeteksi blok kode `python`, `bash`, `javascript`, dll.
@@ -195,6 +199,7 @@ agent:
   - **Preview Generator:** Membuat preview HTML yang ramah user sebelum dikirim ke Hermes.
 
 ### Modul E: Sandbox Approval UI 🟡 (FASE 3)
+
 - **Fungsi:** Menampilkan dialog konfirmasi di Web UI sebelum middleware mengirim tool call ke Hermes.
 - **Komponen:**
   - Panel Preview: Menampilkan nama file, bahasa, dan isi kode.
@@ -215,11 +220,11 @@ from typing import Optional
 def extract_file_path_from_prompt(prompt: str) -> Optional[str]:
     """
     Ekstrak path file dari prompt Hermes dengan strategi hierarkis:
-    
+
     Prioritas 1: Format eksplisit [FILE: path] (Opsi A - Instruct Hermes)
     Prioritas 2: Regex natural language (backward compatibility)
     Prioritas 3: Return None → fallback ke dialog manual di UI
-    
+
     Contoh:
     - "[FILE: hello.py] Buatkan file yang mencetak Halo" → "hello.py"
     - "Buatkan file hello.py yang mencetak Halo" → "hello.py"
@@ -230,7 +235,7 @@ def extract_file_path_from_prompt(prompt: str) -> Optional[str]:
     explicit_match = re.search(r'\[FILE:\s*([^\]]+)\]', prompt)
     if explicit_match:
         return explicit_match.group(1).strip()
-    
+
     # === PRIORITAS 2: Natural Language Patterns (Fallback) ===
     patterns = [
         r'(?:file|berkas)\s+`?([a-zA-Z0-9_\-./]+\.[a-zA-Z0-9]+)`?',  # "file hello.py"
@@ -242,7 +247,7 @@ def extract_file_path_from_prompt(prompt: str) -> Optional[str]:
         match = re.search(pattern, prompt, re.IGNORECASE)
         if match:
             return match.group(1)
-    
+
     # === PRIORITAS 3: Return None ===
     # UI akan tampilkan dialog input manual
     return None
@@ -255,7 +260,7 @@ def detect_path_source(prompt: str) -> str:
     """
     if re.search(r'\[FILE:\s*[^\]]+\]', prompt):
         return 'explicit'
-    
+
     patterns = [
         r'(?:file|berkas)\s+`?[a-zA-Z0-9_\-./]+\.[a-zA-Z0-9]+`?',
         r'(?:named|bernama)\s+`?[a-zA-Z0-9_\-./]+\.[a-zA-Z0-9]+`?',
@@ -264,7 +269,7 @@ def detect_path_source(prompt: str) -> str:
     for pattern in patterns:
         if re.search(pattern, prompt, re.IGNORECASE):
             return 'natural_language'
-    
+
     return 'manual'
 ```
 
@@ -365,16 +370,16 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 
 ## 6. Manajemen Risiko & Mitigasi
 
-| Risiko | Dampak | Mitigasi |
-| --- | --- | --- |
-| HTTP Timeout dari Hermes | Hermes menganggap middleware error dan membatalkan tugas | 1. Gunakan `asyncio` non-blocking di FastAPI. <br/>2. Konfigurasi `timeout` di sisi Hermes Agent (`~/.hermes/config.yaml`) menjadi sangat panjang (1800 detik). |
-| Data Hilang saat Refresh | User tidak sengaja me-refresh halaman Web UI, prompt hilang | Simpan state sementara di `localStorage` browser menggunakan JavaScript. |
-| Format JSON Salah | Hermes menolak respons karena format tidak sesuai standar OpenAI | Pastikan struktur JSON respons (`choices`, `message`, `finish_reason`) 100% meniru standar OpenAI Chat Completions. |
-| Parsing Salah Deteksi (FASE 3) | Middleware salah mengira teks biasa sebagai kode, atau salah ekstrak path | 1. **Preview wajib** sebelum kirim ke Hermes. <br/>2. User bisa reject jika parsing salah. <br/>3. Fallback ke mode teks biasa jika parsing gagal. |
-| Path File Berbahaya (FASE 3) | Hermes menulis file ke lokasi sensitif (misal: `/etc/passwd`) | 1. **Whitelist direktori** di middleware (hanya boleh tulis di `/home/farhan/Proyek/Hermes/`). <br/>2. **Block path absolut** yang mencurigakan. <br/>3. User approval wajib. |
-| Kode Berbahaya (FASE 3) | DeepSeek menghasilkan kode berbahaya (misal: `rm -rf /`) | 1. **Preview wajib** dengan syntax highlighting. <br/>2. User bisa edit kode sebelum approve. <br/>3. Sandbox approval gate. |
-| Regex Gagal Ekstrak Path (FASE 3) | Prompt Hermes tidak mengandung pola yang dikenali | Fallback ke dialog input manual di Web UI untuk memasukkan path. Dengan **Opsi A (Instruct Hermes)**, risiko ini berkurang drastis karena format `[FILE: path]` dijamin ada di prompt baru. |
-| Hermes Tidak Mengikuti Format [FILE:] (FASE 3) | Hermes lama atau prompt lama tidak pakai format eksplisit | Fallback otomatis ke regex natural language (Prioritas 2). Backward compatibility tetap terjaga. |
+| Risiko                                         | Dampak                                                                    | Mitigasi                                                                                                                                                                                    |
+| ---------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP Timeout dari Hermes                       | Hermes menganggap middleware error dan membatalkan tugas                  | 1. Gunakan `asyncio` non-blocking di FastAPI. <br/>2. Konfigurasi `timeout` di sisi Hermes Agent (`~/.hermes/config.yaml`) menjadi sangat panjang (1800 detik).                             |
+| Data Hilang saat Refresh                       | User tidak sengaja me-refresh halaman Web UI, prompt hilang               | Simpan state sementara di `localStorage` browser menggunakan JavaScript.                                                                                                                    |
+| Format JSON Salah                              | Hermes menolak respons karena format tidak sesuai standar OpenAI          | Pastikan struktur JSON respons (`choices`, `message`, `finish_reason`) 100% meniru standar OpenAI Chat Completions.                                                                         |
+| Parsing Salah Deteksi (FASE 3)                 | Middleware salah mengira teks biasa sebagai kode, atau salah ekstrak path | 1. **Preview wajib** sebelum kirim ke Hermes. <br/>2. User bisa reject jika parsing salah. <br/>3. Fallback ke mode teks biasa jika parsing gagal.                                          |
+| Path File Berbahaya (FASE 3)                   | Hermes menulis file ke lokasi sensitif (misal: `/etc/passwd`)             | 1. **Whitelist direktori** di middleware (hanya boleh tulis di `/home/farhan/Proyek/Hermes/`). <br/>2. **Block path absolut** yang mencurigakan. <br/>3. User approval wajib.               |
+| Kode Berbahaya (FASE 3)                        | DeepSeek menghasilkan kode berbahaya (misal: `rm -rf /`)                  | 1. **Preview wajib** dengan syntax highlighting. <br/>2. User bisa edit kode sebelum approve. <br/>3. Sandbox approval gate.                                                                |
+| Regex Gagal Ekstrak Path (FASE 3)              | Prompt Hermes tidak mengandung pola yang dikenali                         | Fallback ke dialog input manual di Web UI untuk memasukkan path. Dengan **Opsi A (Instruct Hermes)**, risiko ini berkurang drastis karena format `[FILE: path]` dijamin ada di prompt baru. |
+| Hermes Tidak Mengikuti Format [FILE:] (FASE 3) | Hermes lama atau prompt lama tidak pakai format eksplisit                 | Fallback otomatis ke regex natural language (Prioritas 2). Backward compatibility tetap terjaga.                                                                                            |
 
 ---
 
@@ -402,29 +407,34 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 
 Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke Hermes.
 
-- [ ] **Konfigurasi Awal: Opsi A (Instruct Hermes)**
+- [ ] **Konfigurasi Awal: (Instruct Hermes)**
+  
   - [ ] Update `~/.hermes/config.yaml` dengan system prompt yang menginstruksikan format `[FILE: path]`.
   - [ ] Test bahwa Hermes Agent mematuhi format baru.
 
 - [ ] **Modul D: Code Parser & Path Extractor**
+  
   - [ ] Implementasi fungsi `extract_code_blocks()` untuk deteksi blok kode.
-  - [ ] Implementasi fungsi `extract_file_path_from_prompt()` untuk ekstrak path dari prompt Hermes **dengan prioritas format eksplisit `[FILE: path]` (Opsi A: Instruct Hermes), dilengkapi fallback regex natural language dan dialog input manual.**
+  - [ ] Implementasi fungsi `extract_file_path_from_prompt()` untuk ekstrak path dari prompt Hermes **dengan prioritas format eksplisit `[FILE: path]` (Instruct Hermes), dilengkapi fallback regex natural language dan dialog input manual.**
   - [ ] Implementasi fungsi `detect_path_source()` untuk indikator UI (sumber path).
   - [ ] Implementasi fungsi `build_tool_call_response()` untuk bungkus ke format OpenAI tool call.
   - [ ] Unit test untuk berbagai pola prompt dan respons (eksplisit, NL, fallback).
 
 - [ ] **Modul E: Sandbox Approval UI**
+  
   - [ ] Tambahkan panel preview di Web UI yang muncul saat kode terdeteksi.
   - [ ] Tampilkan informasi: nama file, **sumber path (Eksplisit/NL/Manual)**, bahasa, ukuran, isi kode.
   - [ ] Implementasi tombol "Izinkan", "Edit & Izinkan", "Tolak".
   - [ ] Implementasi editable preview (user bisa modifikasi kode sebelum approve).
 
 - [ ] **Keamanan & Fallback**
+  
   - [ ] Implementasi whitelist direktori (hanya boleh tulis di path tertentu).
   - [ ] Implementasi fallback ke mode teks biasa jika parsing gagal.
   - [ ] Implementasi dialog input path manual jika regex tidak bisa ekstrak.
 
 - [ ] **Testing End-to-End**
+  
   - [ ] Tes: Hermes minta buat file Python dengan `[FILE: hello.py]` → parsing berhasil (Prioritas 1).
   - [ ] Tes: Hermes minta buat file Python tanpa format eksplisit → parsing berhasil via NL (Prioritas 2).
   - [ ] Tes: Hermes minta buat bash script → parsing berhasil.
@@ -442,17 +452,17 @@ Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke He
 
 ## 8. Lingkungan Kerja
 
-| Item | Detail |
-| --- | --- |
-| OS | Lubuntu 24 |
-| Path Root Project | `/home/farhan/Proyek/Hermes` |
-| Path Installasi Hermes | `/home/farhan/.hermes` |
-| Alat Editing | `featherpad` dan `Visual Studio Code` |
-| Hardware | Acer E-14 E5-475G-38LQ, RAM 4GB |
-| Processor | Intel Core i3-600U (2.0 GHz, 3MB L3 Cache) |
-| Repository GitHub | https://github.com/farhansyihab/hermes-manual-bridge.git |
-| Git Auth | `gh` sudah terinstal, sudah login via SSH key |
-| Struktur Direktori | Lihat bagian 9 di bawah |
+| Item                   | Detail                                                   |
+| ---------------------- | -------------------------------------------------------- |
+| OS                     | Lubuntu 24                                               |
+| Path Root Project      | `/home/farhan/Proyek/Hermes`                             |
+| Path Installasi Hermes | `/home/farhan/.hermes`                                   |
+| Alat Editing           | `featherpad` dan `Visual Studio Code`                    |
+| Hardware               | Acer E-14 E5-475G-38LQ, RAM 4GB                          |
+| Processor              | Intel Core i3-600U (2.0 GHz, 3MB L3 Cache)               |
+| Repository GitHub      | https://github.com/farhansyihab/hermes-manual-bridge.git |
+| Git Auth               | `gh` sudah terinstal, sudah login via SSH key            |
+| Struktur Direktori     | Lihat bagian 9 di bawah                                  |
 
 ---
 
@@ -513,20 +523,28 @@ Hermes/
 #### Skenario 1: Buat File Python (Format Eksplisit - Prioritas 1)
 
 1. User ketik di Hermes: `Buatkan file hello.py yang mencetak "Halo dari Hermes!"`
-2. Hermes (dengan system prompt Opsi A) kirim prompt: `[FILE: hello.py] Buatkan file yang mencetak "Halo dari Hermes!"`
-3. User copy-paste ke DeepSeek.
-4. DeepSeek balas dengan:
 
+2. Hermes (dengan system prompt Opsi A) kirim prompt: `[FILE: hello.py] Buatkan file yang mencetak "Halo dari Hermes!"`
+
+3. User copy-paste ke DeepSeek.
+
+4. DeepSeek balas dengan:
+   
    Berikut isi file hello.py:
+   
    ```python
    print("Halo dari Hermes!")
    ```
 
 5. User paste ke middleware.
+
 6. Middleware deteksi:
+   
    - Blok `python` ✅
    - Path `hello.py` dari `[FILE: hello.py]` ✅ (Prioritas 1 - Eksplisit)
+
 7. Middleware tampilkan preview:
+   
    ```
    Hermes ingin menulis file: hello.py
    Sumber path: Eksplisit [FILE: ...]
@@ -535,8 +553,11 @@ Hermes/
    [Isi kode]
    [Izinkan] [Edit & Izinkan] [Tolak]
    ```
+
 8. User klik "Izinkan".
+
 9. Middleware bungkus ke tool call JSON, kirim ke Hermes.
+
 10. Hermes tulis file `hello.py` ke hardisk. ✅
 
 #### Skenario 2: Prompt Lama Tanpa Format Eksplisit (Prioritas 2 - NL)
@@ -583,8 +604,8 @@ Hermes/
 
 ## 12. Log Perubahan (Changelog)
 
-| Tanggal | Versi | Perubahan |
-| --- | --- | --- |
-| 2026-11-09 | 1.0.0 | Initial blueprint. Fase 1 selesai (MVP). |
-| 2026-11-09 | 1.1.0 | Tambahkan Fase 3: Parsing Otomatis (Opsi A) + Ekstrak Path dari Prompt Hermes (Opsi A). Tambahkan Modul D & E. Tambahkan detail teknis parsing. |
+| Tanggal    | Versi | Perubahan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-09 | 1.0.0 | Initial blueprint. Fase 1 selesai (MVP).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 2026-11-09 | 1.1.0 | Tambahkan Fase 3: Parsing Otomatis (Opsi A) + Ekstrak Path dari Prompt Hermes (Opsi A). Tambahkan Modul D & E. Tambahkan detail teknis parsing.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-11-10 | 1.2.0 | **Refinement Opsi A: Instruct Hermes.** (1) Update kalimat Modul D untuk memperjelas hierarki path extraction: Prioritas 1 `[FILE: path]` → Prioritas 2 regex NL → Prioritas 3 dialog manual. (2) Tambahkan fungsi `detect_path_source()` untuk indikator UI. (3) Update flowchart 5.4 dengan hierarki prioritas. (4) Tambahkan sub-bab 3 "Konfigurasi Hermes untuk Opsi A" dengan contoh system prompt. (5) Tambahkan mitigasi risiko "Hermes Tidak Mengikuti Format". (6) Update Skenario 1-3 untuk mencerminkan 3 prioritas. (7) Tambahkan checklist "Konfigurasi Awal: Opsi A" di Fase 3 roadmap. |
