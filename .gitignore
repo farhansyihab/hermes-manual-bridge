@@ -70,6 +70,10 @@ desktop.ini
 .coverage
 htmlcov/
 .tox/
+planning/LaporanSelesai/
+middleware/test/
+LaporanSelesai/
+test/
 
 # ============================================
 # Node (jika nanti ada frontend build)
