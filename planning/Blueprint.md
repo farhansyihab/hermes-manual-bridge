@@ -407,10 +407,10 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 
 Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke Hermes.
 
-- [ ] **Konfigurasi Awal: (Instruct Hermes)**
+- [x] **Konfigurasi Awal: (Instruct Hermes)**
   
-  - [ ] Update `~/.hermes/config.yaml` dengan system prompt yang menginstruksikan format `[FILE: path]`.
-  - [ ] Test bahwa Hermes Agent mematuhi format baru.
+  - [x] Update `~/.hermes/config.yaml` dengan system prompt yang menginstruksikan format `[FILE: path]`.
+  - [x] Test bahwa Hermes Agent mematuhi format baru.
 
 - [ ] **Modul D: Code Parser & Path Extractor**
   
