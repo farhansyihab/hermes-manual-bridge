@@ -1,7 +1,8 @@
 /* =========================================================
-   Hermes Manual Bridge - Main Stylesheet
-   Dipisahkan dari ui.py agar lebih mudah dirawat.
-   ========================================================= */
+ * Hermes Manual Bridge - Main Stylesheet
+ * Dipisahkan dari ui.py agar lebih mudah dirawat.
+ * ========================================================= */
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     max-width: 900px;
@@ -229,8 +230,9 @@ button:disabled {
 }
 
 /* =========================================================
-   MODUL E: SANDBOX APPROVAL PANEL STYLES
-   ========================================================= */
+ * MODUL E: SANDBOX APPROVAL PANEL STYLES
+ * ========================================================= */
+
 .approval-panel {
     margin-top: 1.5rem;
     border: 2px solid #007bff;
@@ -340,6 +342,7 @@ button:disabled {
     font-size: 0.8rem;
     font-weight: bold;
     color: white;
+    cursor: help;
 }
 
 .path-source-badge.source-explicit {
@@ -518,8 +521,9 @@ button:disabled {
 }
 
 /* =========================================================
-   History Styles
-   ========================================================= */
+ * History Styles
+ * ========================================================= */
+
 .history-toolbar {
     display: flex;
     justify-content: space-between;
@@ -636,8 +640,9 @@ button:disabled {
 }
 
 /* =========================================================
-   Syntax Highlighting Preview (legacy - masih dipakai)
-   ========================================================= */
+ * Syntax Highlighting Preview (legacy - masih dipakai)
+ * ========================================================= */
+
 .preview-container {
     margin-top: 1rem;
     border: 1px solid #ddd;
@@ -687,21 +692,22 @@ button:disabled {
 }
 
 /* =========================================================
-   Responsive Design
-   ========================================================= */
+ * Responsive Design
+ * ========================================================= */
+
 @media (max-width: 600px) {
     .file-info-grid {
         grid-template-columns: 1fr;
     }
-
+    
     .approval-actions {
         flex-direction: column;
     }
-
+    
     .btn-approval {
         width: 100%;
     }
-
+    
     .header {
         flex-direction: column;
         align-items: flex-start;

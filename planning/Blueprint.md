@@ -423,7 +423,7 @@ Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke He
 - [ ] **Modul E: Sandbox Approval UI**
   
   - [x] Tambahkan panel preview di Web UI yang muncul saat kode terdeteksi.
-  - [ ] Tampilkan informasi: nama file, **sumber path (Eksplisit/NL/Manual)**, bahasa, ukuran, isi kode.
+  - [x] Tampilkan informasi: nama file, **sumber path (Eksplisit/NL/Manual)**, bahasa, ukuran, isi kode.
   - [ ] Implementasi tombol "Izinkan", "Edit & Izinkan", "Tolak".
   - [ ] Implementasi editable preview (user bisa modifikasi kode sebelum approve).
 

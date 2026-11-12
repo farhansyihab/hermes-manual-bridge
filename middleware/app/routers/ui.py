@@ -1,30 +1,13 @@
 """
 Router Web UI (Modul B) - Hermes Manual Bridge.
-
 REFAKTOR v0.3.0:
 File ini sebelumnya > 1000 baris karena memuat seluruh JavaScript inline.
 Sekarang HANYA memuat markup HTML + daftar tag <script>.
 Seluruh logika JavaScript dipindah ke middleware/static/js/ dan dipecah
-per tanggung jawab:
+per tanggung jawab.
 
-    config.js    : konstanta (endpoint, interval polling, key localStorage)
-    utils.js     : helper umum (escapeHtml, setStatus, format waktu)
-    dom.js       : registry referensi elemen DOM (objek `dom`)
-    state.js     : state aplikasi terpusat (objek `AppState`)
-    parser.js    : parsing blok kode, ekstraksi path, deteksi bahaya
-    tabs.js      : navigasi tab Dashboard / Riwayat
-    draft.js     : draft jawaban di localStorage (+ tombol Clear Draft)
-    prompt.js    : polling /get_prompt + fitur Edit Prompt
-    approval.js  : Modul E - Sandbox Approval Panel
-    submit.js    : pengiriman respons / tool call ke Hermes
-    history.js   : tab Riwayat (list, detail, hapus, export)
-    main.js      : bootstrap (inisialisasi DOM & event listener)
-
-CATATAN PENTING:
-File ini TIDAK boleh memuat triple backtick literal. Jika perlu karakter
-backtick di dalam Python, bangun via chr(96).
+MODUL E: Sandbox Approval Panel sudah terintegrasi di HTML ini.
 """
-
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
@@ -40,10 +23,10 @@ async def web_ui():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hermes Manual Bridge Dashboard</title>
-
+    
     <!-- CSS lokal -->
     <link rel="stylesheet" href="/static/style.css">
-
+    
     <!-- Prism.js CSS (library eksternal, tetap dari CDN) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
@@ -64,7 +47,6 @@ async def web_ui():
     <!-- ================================================== -->
     <div id="dashboard-tab" class="tab-content active">
         <div class="container">
-
             <!-- BOX 1: Prompt dari Hermes -->
             <div class="box">
                 <div class="box-header">
@@ -121,10 +103,11 @@ async def web_ui():
                             <span id="toggleIcon">▼</span> Detail
                         </button>
                     </div>
-
+                    
                     <div id="approvalDetails" class="approval-details">
-                        <!-- File Info -->
+                        <!-- File Info Grid -->
                         <div class="file-info-grid">
+                            <!-- Nama File -->
                             <div class="info-item">
                                 <label>📄 Nama File:</label>
                                 <div class="info-value">
@@ -134,18 +117,24 @@ async def web_ui():
                                 <input type="text" id="fileNameInput" class="file-name-input"
                                        style="display:none;" placeholder="path/ke/file.ext">
                             </div>
+
+                            <!-- Sumber Path (Eksplisit/NL/Manual) -->
                             <div class="info-item">
                                 <label>🎯 Sumber Path:</label>
                                 <div class="info-value">
                                     <span id="pathSourceBadge" class="path-source-badge">-</span>
                                 </div>
                             </div>
+
+                            <!-- Bahasa -->
                             <div class="info-item">
                                 <label>💻 Bahasa:</label>
                                 <div class="info-value">
                                     <span id="languageDisplay" class="language-badge">-</span>
                                 </div>
                             </div>
+
+                            <!-- Ukuran -->
                             <div class="info-item">
                                 <label>📏 Ukuran:</label>
                                 <div class="info-value">
