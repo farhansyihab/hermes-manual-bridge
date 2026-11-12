@@ -403,7 +403,7 @@ INPUT: Respons DeepSeek (teks) + Prompt Hermes (teks)
 - [ ] Tambahkan notifikasi suara/browser saat prompt baru masuk. --> bagian ini belum diperlukan (PENDING)
 - [x] Tambahkan fitur "Clear Draft" untuk menghapus draft jawaban yang tersimpan di localStorage.
 
-### 🟠 Fase 3: Advanced Agent Control (Parsing Otomatis) — STATUS: 🔲 BELUM DIMULAI
+### 🟠 Fase 3: Advanced Agent Control (Parsing Otomatis) — STATUS: 🔲 BELUM SELESAI
 
 Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke Hermes.
 
@@ -427,11 +427,11 @@ Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke He
   - [x] Implementasi tombol "Izinkan", "Edit & Izinkan", "Tolak".
   - [x] Implementasi editable preview (user bisa modifikasi kode sebelum approve).
 
-- [ ] **Keamanan & Fallback**
+- [x] **Keamanan & Fallback**
   
-  - [ ] Implementasi whitelist direktori (hanya boleh tulis di path tertentu).
-  - [ ] Implementasi fallback ke mode teks biasa jika parsing gagal.
-  - [ ] Implementasi dialog input path manual jika regex tidak bisa ekstrak.
+  - [x] Implementasi whitelist direktori (hanya boleh tulis di path tertentu).
+  - [x] Implementasi fallback ke mode teks biasa jika parsing gagal.
+  - [x] Implementasi dialog input path manual jika regex tidak bisa ekstrak.
 
 - [ ] **Testing End-to-End**
   

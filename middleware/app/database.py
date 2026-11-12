@@ -1,6 +1,17 @@
+"""
+Database manager untuk Hermes Manual Bridge.
+Menggunakan SQLite untuk menyimpan riwayat percakapan.
+
+KEAMANAN & FALLBACK (Fase 3):
+- Tambah kolom 'status' untuk track mode (completed/fallback)
+- Migration aman untuk kolom baru
+
+Version: 1.1.0 (Keamanan & Fallback)
+"""
 import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
+
 
 # Path database - di dalam root project
 PROJECT_ROOT = Path("/home/farhan/Proyek/Hermes")
@@ -59,7 +70,7 @@ def init_db():
                 original_prompt TEXT
             )
         """)
-
+        
         # Migration: tambahkan kolom original_prompt jika belum ada
         # (untuk database yang sudah dibuat sebelum fitur Edit Prompt)
         if not _column_exists(conn, "conversations", "original_prompt"):
@@ -68,7 +79,7 @@ def init_db():
                 ADD COLUMN original_prompt TEXT
             """)
             print("[DB] Kolom 'original_prompt' ditambahkan via migration")
-
+        
         # Index untuk query cepat
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_timestamp

@@ -1,6 +1,8 @@
 /**
- * approval.js - MODUL E: Sandbox Approval Panel
+ * approval.js - MODUL E: Sandbox Approval Panel + Keamanan & Fallback (Fase 3)
+ * 
  * Menampilkan preview kode + info file sebelum tool call dikirim ke Hermes.
+ * 
  * Prinsip: TIDAK ada penulisan file tanpa persetujuan user.
  * 
  * Fitur:
@@ -8,9 +10,14 @@
  * - Ekstraksi path dari prompt Hermes (3 prioritas)
  * - Indikator sumber path (Eksplisit/NL/Manual)
  * - Preview kode dengan syntax highlighting
- * - Validasi keamanan path
+ * - Validasi keamanan path (format + whitelist)
  * - Deteksi kode berbahaya
  * - Edit kode sebelum approve
+ * - KEAMANAN & FALLBACK: Dialog input path manual
+ * - KEAMANAN & FALLBACK: Tombol fallback ke mode teks biasa
+ * - KEAMANAN & FALLBACK: Validasi whitelist direktori
+ * 
+ * Version: 1.1.0 (Keamanan & Fallback)
  */
 
 /**
@@ -22,19 +29,19 @@ function detectAndShowApprovalPanel() {
         hideApprovalPanel();
         return;
     }
-
+    
     const codeBlocks = extractCodeBlocks(text);
     if (codeBlocks.length === 0) {
         hideApprovalPanel();
         return;
     }
-
+    
     AppState.detectedCodeBlocks = codeBlocks;
     
     const pathInfo = extractFilePathFromPrompt(dom.promptArea.value);
     AppState.detectedFilePath = pathInfo.path;
     AppState.detectedPathSource = pathInfo.source;
-
+    
     showApprovalPanel();
 }
 
@@ -51,10 +58,11 @@ function showApprovalPanel() {
         dom.codeEditArea.style.display = 'none';
         dom.codeEditToggle.textContent = '✏️ Edit Kode';
     }
-
+    
     updateFileInfo();
     updateCodePreview();
     checkForWarnings();
+    checkWhitelist();  // KEAMANAN & FALLBACK: Cek whitelist
     
     AppState.approvalState = 'pending';
     updateApprovalButtons();
@@ -81,7 +89,7 @@ function updateFileInfo() {
         dom.fileNameDisplay.textContent = '⚠️ Tidak terdeteksi - Klik Edit untuk input manual';
         dom.fileNameDisplay.classList.add('no-path');
     }
-
+    
     // === SUMBER PATH (Eksplisit/NL/Manual) ===
     const sourceInfo = getPathSourceInfo(AppState.detectedPathSource);
     dom.pathSourceBadge.className = 'path-source-badge source-' + AppState.detectedPathSource;
@@ -89,7 +97,7 @@ function updateFileInfo() {
     
     // Tambahkan tooltip untuk penjelasan lebih detail
     dom.pathSourceBadge.title = getSourceExplanation(AppState.detectedPathSource);
-
+    
     // === BAHASA & UKURAN ===
     if (AppState.detectedCodeBlocks.length > 0) {
         const first = AppState.detectedCodeBlocks[0];
@@ -122,11 +130,11 @@ function getSourceExplanation(source) {
  */
 function updateCodePreview() {
     if (AppState.detectedCodeBlocks.length === 0) return;
-
+    
     const first = AppState.detectedCodeBlocks[0];
     dom.codePreviewCode.textContent = first.content;
     dom.codePreviewCode.className = 'language-' + first.language + ' line-numbers';
-
+    
     if (window.Prism) {
         Prism.highlightElement(dom.codePreviewCode);
     }
@@ -137,7 +145,7 @@ function updateCodePreview() {
  */
 function checkForWarnings() {
     const warnings = [];
-
+    
     // Warning 1: Path tidak terdeteksi
     if (!AppState.detectedFilePath) {
         warnings.push({
@@ -145,7 +153,8 @@ function checkForWarnings() {
             icon: '⚠️',
             message: 'Path file tidak terdeteksi. Silakan input manual sebelum approve.'
         });
-    } 
+    }
+    
     // Warning 2: Path mencurigakan
     else if (isPathSuspicious(AppState.detectedFilePath)) {
         warnings.push({
@@ -154,7 +163,7 @@ function checkForWarnings() {
             message: 'Path mencurigakan terdeteksi! Pastikan ini aman sebelum approve.'
         });
     }
-
+    
     // Warning 3: Kode berbahaya
     if (AppState.detectedCodeBlocks.length > 0) {
         const dangerous = containsDangerousCode(AppState.detectedCodeBlocks[0].content);
@@ -162,27 +171,78 @@ function checkForWarnings() {
             warnings.push({
                 type: 'danger',
                 icon: '🚨',
-                message: 'Kode mengandung command berpotensi berbahaya: ' + 
-                         dangerous.join(', ') + '. Review dengan seksama!'
+                message: 'Kode mengandung command berpotensi berbahaya: ' +
+                    dangerous.join(', ') + '. Review dengan seksama!'
             });
         }
     }
-
+    
     // Tampilkan atau sembunyikan warnings
     if (warnings.length === 0) {
         dom.approvalWarnings.style.display = 'none';
         dom.approvalWarnings.innerHTML = '';
         return;
     }
-
+    
     dom.approvalWarnings.innerHTML = warnings.map(function(w) {
         return '<div class="warning-item warning-' + w.type + '">' +
-               '<span class="warning-icon">' + w.icon + '</span>' +
-               '<span>' + escapeHtml(w.message) + '</span>' +
-               '</div>';
+            '<span class="warning-icon">' + w.icon + '</span>' +
+            '<span>' + escapeHtml(w.message) + '</span>' +
+            '</div>';
     }).join('');
     
     dom.approvalWarnings.style.display = 'block';
+}
+
+/**
+ * KEAMANAN & FALLBACK: Cek path terhadap whitelist direktori.
+ * Tampilkan warning jika path di luar whitelist.
+ */
+async function checkWhitelist() {
+    if (!AppState.detectedFilePath) return;
+    
+    try {
+        const res = await fetch(CONFIG.ENDPOINTS.APPROVAL_CHECK_WHITELIST, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: AppState.detectedFilePath })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            AppState.whitelistValid = data.is_valid;
+            AppState.whitelistError = data.error_message;
+            
+            // Tampilkan warning whitelist di UI
+            updateWhitelistWarning();
+        }
+    } catch (err) {
+        console.error('Gagal cek whitelist:', err);
+    }
+}
+
+/**
+ * KEAMANAN & FALLBACK: Update warning whitelist di UI.
+ */
+function updateWhitelistWarning() {
+    // Hapus warning whitelist lama jika ada
+    const oldWarning = document.getElementById('whitelist-warning');
+    if (oldWarning) oldWarning.remove();
+    
+    // Jika path tidak valid terhadap whitelist, tampilkan warning
+    if (AppState.whitelistValid === false && AppState.whitelistError) {
+        const warningDiv = document.createElement('div');
+        warningDiv.id = 'whitelist-warning';
+        warningDiv.className = 'warning-item warning-danger';
+        warningDiv.innerHTML = '<span class="warning-icon">🚫</span>' +
+            '<span>' + escapeHtml(AppState.whitelistError) + '</span>';
+        
+        // Tambahkan di atas approval warnings
+        if (dom.approvalWarnings) {
+            dom.approvalWarnings.insertBefore(warningDiv, dom.approvalWarnings.firstChild);
+            dom.approvalWarnings.style.display = 'block';
+        }
+    }
 }
 
 /**
@@ -194,68 +254,212 @@ function toggleApprovalDetails() {
     dom.toggleIcon.textContent = isHidden ? '▼' : '▲';
 }
 
-/* =========================================================
- * Edit nama file manual (Prioritas 3 - fallback)
- * ========================================================= */
+/* ============================================================
+ * KEAMANAN & FALLBACK: Dialog Input Path Manual
+ * ============================================================ */
 
 /**
- * Masuk ke mode edit nama file.
+ * Tampilkan dialog modal untuk input path manual.
+ * Dipanggil ketika path tidak terdeteksi dan user klik "Edit".
  */
-function editFileName() {
-    dom.fileNameDisplay.style.display = 'none';
-    dom.fileNameInput.style.display = 'block';
-    dom.fileNameInput.value = AppState.detectedFilePath || '';
-    dom.fileNameInput.focus();
-    
-    dom.fileNameInput.onblur = saveFileName;
-    dom.fileNameInput.onkeydown = function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            saveFileName();
-        } else if (e.key === 'Escape') {
-            cancelEditFileName();
-        }
-    };
-}
-
-/**
- * Simpan nama file yang diedit.
- */
-function saveFileName() {
-    const newPath = dom.fileNameInput.value.trim();
-    
-    if (newPath) {
-        AppState.detectedFilePath = newPath;
-        AppState.detectedPathSource = 'manual';
-        updateFileInfo();
-        checkForWarnings();
+function showManualPathDialog() {
+    // Buat modal jika belum ada
+    let modal = document.getElementById('manual-path-modal');
+    if (!modal) {
+        modal = createManualPathModal();
+        document.body.appendChild(modal);
     }
     
-    dom.fileNameInput.style.display = 'none';
-    dom.fileNameDisplay.style.display = 'block';
+    // Set nilai awal
+    const input = modal.querySelector('#manual-path-input');
+    input.value = AppState.detectedFilePath || '';
+    input.focus();
+    
+    // Tampilkan modal
+    modal.style.display = 'flex';
 }
 
 /**
- * Batalkan edit nama file.
+ * Buat elemen modal untuk input path manual.
  */
-function cancelEditFileName() {
-    dom.fileNameInput.onblur = null;
-    dom.fileNameInput.style.display = 'none';
-    dom.fileNameDisplay.style.display = 'block';
+function createManualPathModal() {
+    const modal = document.createElement('div');
+    modal.id = 'manual-path-modal';
+    modal.className = 'modal-overlay';
+    modal.style.display = 'none';
+    
+    modal.innerHTML = '<div class="modal-content">' +
+        '<div class="modal-header">' +
+            '<h3>📝 Input Path File Manual</h3>' +
+            '<button class="modal-close" onclick="closeManualPathDialog()">×</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+            '<p>Masukkan path file yang akan ditulis (relatif terhadap project root):</p>' +
+            '<input type="text" id="manual-path-input" class="manual-path-input" ' +
+                'placeholder="' + CONFIG.MANUAL_INPUT_PLACEHOLDER + '" ' +
+                'maxlength="' + CONFIG.MANUAL_INPUT_MAX_LENGTH + '">' +
+            '<div class="modal-hint">' +
+                '<strong>Contoh:</strong> src/utils/helpers.py, scripts/backup.sh<br>' +
+                '<strong>Whitelist direktori:</strong> ' + CONFIG.WHITELISTED_DIRECTORIES.join(', ') +
+            '</div>' +
+            '<div id="manual-path-validation" class="manual-path-validation"></div>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+            '<button class="btn-modal btn-secondary" onclick="closeManualPathDialog()">Batal</button>' +
+            '<button class="btn-modal btn-primary" onclick="saveManualPath()">💾 Simpan</button>' +
+        '</div>' +
+    '</div>';
+    
+    // Event listener untuk validasi real-time
+    const input = modal.querySelector('#manual-path-input');
+    input.addEventListener('input', function() {
+        validateManualPathInput(this.value);
+    });
+    
+    // Event listener untuk Enter key
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveManualPath();
+        } else if (e.key === 'Escape') {
+            closeManualPathDialog();
+        }
+    });
+    
+    return modal;
 }
 
-/* =========================================================
+/**
+ * Validasi input path manual secara real-time.
+ */
+async function validateManualPathInput(path) {
+    const validationDiv = document.getElementById('manual-path-validation');
+    if (!validationDiv) return;
+    
+    if (!path.trim()) {
+        validationDiv.innerHTML = '';
+        return;
+    }
+    
+    try {
+        const res = await fetch(CONFIG.ENDPOINTS.APPROVAL_VALIDATE_PATH, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: path })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            
+            if (data.is_valid && data.whitelist_valid) {
+                validationDiv.innerHTML = '<div class="validation-success">✅ Path valid dan diizinkan</div>';
+            } else {
+                let errorMsg = '';
+                if (!data.is_valid) {
+                    errorMsg = data.error_message;
+                } else if (!data.whitelist_valid) {
+                    errorMsg = data.whitelist_error;
+                }
+                validationDiv.innerHTML = '<div class="validation-error">❌ ' + escapeHtml(errorMsg) + '</div>';
+            }
+        }
+    } catch (err) {
+        console.error('Gagal validasi path:', err);
+        validationDiv.innerHTML = '<div class="validation-error">❌ Error validasi</div>';
+    }
+}
+
+/**
+ * Simpan path manual yang diinput user.
+ */
+async function saveManualPath() {
+    const input = document.querySelector('#manual-path-input');
+    const newPath = input.value.trim();
+    
+    if (!newPath) {
+        alert('⚠️ Path tidak boleh kosong!');
+        return;
+    }
+    
+    // Validasi path di backend
+    try {
+        const res = await fetch(CONFIG.ENDPOINTS.APPROVAL_VALIDATE_PATH, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: newPath })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            
+            if (!data.is_valid) {
+                alert('❌ Path tidak valid: ' + data.error_message);
+                return;
+            }
+            
+            if (!data.whitelist_valid) {
+                const confirmMsg = '⚠️ ' + data.whitelist_error + '\n\n' +
+                    'Yakin ingin melanjutkan?';
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Gagal validasi path:', err);
+        alert('❌ Error validasi path');
+        return;
+    }
+    
+    // Simpan path
+    AppState.detectedFilePath = newPath;
+    AppState.detectedPathSource = 'manual';
+    
+    // Update UI
+    updateFileInfo();
+    checkForWarnings();
+    checkWhitelist();
+    
+    // Tutup modal
+    closeManualPathDialog();
+}
+
+/**
+ * Tutup dialog input path manual.
+ */
+function closeManualPathDialog() {
+    const modal = document.getElementById('manual-path-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Masuk ke mode edit nama file (legacy - sekarang pakai modal).
+ */
+function editFileName() {
+    showManualPathDialog();
+}
+
+/**
+ * Batalkan edit nama file (legacy).
+ */
+function cancelEditFileName() {
+    closeManualPathDialog();
+}
+
+/* ============================================================
  * Edit kode sebelum approve
- * ========================================================= */
+ * ============================================================ */
 
 /**
  * Toggle mode edit kode.
  */
 function toggleCodeEdit() {
     if (AppState.detectedCodeBlocks.length === 0) return;
-
+    
     AppState.isCodeEditMode = !AppState.isCodeEditMode;
-
+    
     if (AppState.isCodeEditMode) {
         dom.codePreviewPre.style.display = 'none';
         dom.codeEditArea.style.display = 'block';
@@ -294,11 +498,11 @@ function commitCodeEdit() {
  */
 function copyCodeToClipboard(btn) {
     if (AppState.detectedCodeBlocks.length === 0) return;
-
-    const code = AppState.isCodeEditMode 
-        ? dom.codeEditArea.value 
+    
+    const code = AppState.isCodeEditMode
+        ? dom.codeEditArea.value
         : AppState.detectedCodeBlocks[0].content;
-
+    
     navigator.clipboard.writeText(code).then(function() {
         if (!btn) return;
         
@@ -314,9 +518,9 @@ function copyCodeToClipboard(btn) {
     });
 }
 
-/* =========================================================
+/* ============================================================
  * Aksi approval
- * ========================================================= */
+ * ============================================================ */
 
 /**
  * Approve kode dan kirim ke Hermes.
@@ -324,10 +528,20 @@ function copyCodeToClipboard(btn) {
 function approveCode() {
     if (!AppState.detectedFilePath) {
         alert('⚠️ Path file belum ditentukan! Silakan edit dan input path terlebih dahulu.');
-        editFileName();
+        showManualPathDialog();
         return;
     }
-
+    
+    // KEAMANAN & FALLBACK: Cek whitelist sebelum approve
+    if (AppState.whitelistValid === false) {
+        const confirmMsg = '⚠️ Path di luar direktori yang diizinkan!\n\n' +
+            AppState.whitelistError + '\n\n' +
+            'Yakin ingin melanjutkan?';
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+    }
+    
     commitCodeEdit();
     AppState.approvalState = 'approved';
     updateApprovalButtons();
@@ -349,10 +563,10 @@ function editAndApprove() {
  */
 function rejectCode() {
     if (!confirm('Tolak kode ini? Hermes akan diminta untuk memperbaiki.')) return;
-
+    
     AppState.approvalState = 'rejected';
     updateApprovalButtons();
-
+    
     const rejectionMessage = 'Saya menolak untuk menulis file ini. Tolong perbaiki dan berikan versi yang lebih baik.';
     dom.responseArea.value = rejectionMessage;
     saveDraft(rejectionMessage);
@@ -361,11 +575,33 @@ function rejectCode() {
 }
 
 /**
+ * KEAMANAN & FALLBACK: Kirim sebagai teks biasa (fallback mode).
+ * Dipanggil ketika parsing gagal atau user pilih fallback.
+ */
+function sendAsFallback() {
+    if (!CONFIG.ENABLE_FALLBACK_TO_TEXT) {
+        alert('⚠️ Mode fallback tidak diizinkan dalam konfigurasi.');
+        return;
+    }
+    
+    const confirmMsg = CONFIG.FALLBACK_CONFIRM_MESSAGE + '\n\n' +
+        CONFIG.FALLBACK_WARNING_MESSAGE;
+    
+    if (!confirm(confirmMsg)) return;
+    
+    // Set flag fallback
+    AppState.isFallbackMode = true;
+    
+    // Kirim sebagai teks biasa
+    submitResponse(false, true);
+}
+
+/**
  * Update status tombol approval berdasarkan state.
  */
 function updateApprovalButtons() {
     const state = AppState.approvalState;
-
+    
     if (state === 'approved') {
         dom.approveBtn.disabled = true;
         dom.approveBtn.textContent = '✅ Disetujui';
@@ -373,7 +609,11 @@ function updateApprovalButtons() {
         
         dom.editApproveBtn.disabled = true;
         dom.rejectBtn.disabled = true;
-    } 
+        
+        if (dom.fallbackBtn) {
+            dom.fallbackBtn.disabled = true;
+        }
+    }
     else if (state === 'rejected') {
         dom.rejectBtn.disabled = true;
         dom.rejectBtn.textContent = '❌ Ditolak';
@@ -381,7 +621,11 @@ function updateApprovalButtons() {
         
         dom.approveBtn.disabled = true;
         dom.editApproveBtn.disabled = true;
-    } 
+        
+        if (dom.fallbackBtn) {
+            dom.fallbackBtn.disabled = true;
+        }
+    }
     else {
         dom.approveBtn.disabled = false;
         dom.approveBtn.textContent = '✅ Izinkan & Kirim';
@@ -392,5 +636,9 @@ function updateApprovalButtons() {
         dom.rejectBtn.classList.remove('btn-disabled');
         
         dom.editApproveBtn.disabled = false;
+        
+        if (dom.fallbackBtn) {
+            dom.fallbackBtn.disabled = false;
+        }
     }
 }

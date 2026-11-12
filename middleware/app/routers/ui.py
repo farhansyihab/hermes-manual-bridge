@@ -1,5 +1,10 @@
 """
 Router Web UI (Modul B) - Hermes Manual Bridge.
+
+KEAMANAN & FALLBACK (Fase 3):
+- Tambah tombol "Kirim sebagai Teks Biasa" di approval panel
+- Tambah modal dialog untuk input path manual
+
 REFAKTOR v0.3.0:
 File ini sebelumnya > 1000 baris karena memuat seluruh JavaScript inline.
 Sekarang HANYA memuat markup HTML + daftar tag <script>.
@@ -7,9 +12,12 @@ Seluruh logika JavaScript dipindah ke middleware/static/js/ dan dipecah
 per tanggung jawab.
 
 MODUL E: Sandbox Approval Panel sudah terintegrasi di HTML ini.
+
+Version: 1.1.0 (Keamanan & Fallback)
 """
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
+
 
 router = APIRouter()
 
@@ -36,15 +44,15 @@ async def web_ui():
         <h1>🚀 Hermes Manual Bridge</h1>
         <span id="statusBadge" class="status status-idle">Menunggu Hermes...</span>
     </div>
-
+    
     <div class="tabs">
         <button class="tab active" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
         <button class="tab" onclick="switchTab('history', this)">📜 Riwayat</button>
     </div>
-
-    <!-- ================================================== -->
-    <!-- TAB: DASHBOARD                                     -->
-    <!-- ================================================== -->
+    
+    <!-- ============================================================ -->
+    <!-- TAB: DASHBOARD                                                -->
+    <!-- ============================================================ -->
     <div id="dashboard-tab" class="tab-content active">
         <div class="container">
             <!-- BOX 1: Prompt dari Hermes -->
@@ -69,7 +77,7 @@ async def web_ui():
                     Klik "Edit Prompt" untuk memodifikasi sebelum di-copy.
                 </div>
             </div>
-
+            
             <!-- BOX 2: Jawaban DeepSeek -->
             <div class="box">
                 <div class="box-header">
@@ -88,11 +96,12 @@ async def web_ui():
                 </div>
                 <br>
                 <button id="submitBtn" onclick="submitResponse()" disabled>Kirim ke Hermes</button>
-
-                <!-- ============================================ -->
-                <!-- MODUL E: SANDBOX APPROVAL UI PANEL           -->
-                <!-- Muncul otomatis saat kode terdeteksi         -->
-                <!-- ============================================ -->
+                
+                <!-- ============================================================ -->
+                <!-- MODUL E: SANDBOX APPROVAL UI PANEL                            -->
+                <!-- Muncul otomatis saat kode terdeteksi                          -->
+                <!-- KEAMANAN & FALLBACK: Tambah tombol "Kirim sebagai Teks Biasa" -->
+                <!-- ============================================================ -->
                 <div id="approvalPanel" class="approval-panel" style="display: none;">
                     <div class="approval-header">
                         <div class="approval-title">
@@ -117,7 +126,7 @@ async def web_ui():
                                 <input type="text" id="fileNameInput" class="file-name-input"
                                        style="display:none;" placeholder="path/ke/file.ext">
                             </div>
-
+                            
                             <!-- Sumber Path (Eksplisit/NL/Manual) -->
                             <div class="info-item">
                                 <label>🎯 Sumber Path:</label>
@@ -125,7 +134,7 @@ async def web_ui():
                                     <span id="pathSourceBadge" class="path-source-badge">-</span>
                                 </div>
                             </div>
-
+                            
                             <!-- Bahasa -->
                             <div class="info-item">
                                 <label>💻 Bahasa:</label>
@@ -133,7 +142,7 @@ async def web_ui():
                                     <span id="languageDisplay" class="language-badge">-</span>
                                 </div>
                             </div>
-
+                            
                             <!-- Ukuran -->
                             <div class="info-item">
                                 <label>📏 Ukuran:</label>
@@ -142,7 +151,7 @@ async def web_ui():
                                 </div>
                             </div>
                         </div>
-
+                        
                         <!-- Code Preview -->
                         <div class="code-preview-section">
                             <div class="preview-header">
@@ -160,20 +169,24 @@ async def web_ui():
                                 <textarea id="codeEditArea" style="display:none;" class="code-edit-area"></textarea>
                             </div>
                         </div>
-
+                        
                         <!-- Warning / Info -->
                         <div id="approvalWarnings" class="approval-warnings" style="display:none;"></div>
-
+                        
                         <!-- Approval Actions -->
                         <div class="approval-actions">
                             <button id="approveBtn" class="btn-approval btn-approve" onclick="approveCode()">
-                                ✅ Izinkan &amp; Kirim
+                                ✅ Izinkan & Kirim
                             </button>
                             <button id="editApproveBtn" class="btn-approval btn-edit-approve" onclick="editAndApprove()">
-                                ✏️ Edit &amp; Izinkan
+                                ✏️ Edit & Izinkan
                             </button>
                             <button id="rejectBtn" class="btn-approval btn-reject" onclick="rejectCode()">
                                 ❌ Tolak
+                            </button>
+                            <!-- KEAMANAN & FALLBACK: Tombol Fallback -->
+                            <button id="fallbackBtn" class="btn-approval btn-fallback" onclick="sendAsFallback()">
+                                📝 Kirim sebagai Teks Biasa
                             </button>
                         </div>
                     </div>
@@ -181,10 +194,10 @@ async def web_ui():
             </div>
         </div>
     </div>
-
-    <!-- ================================================== -->
-    <!-- TAB: RIWAYAT                                       -->
-    <!-- ================================================== -->
+    
+    <!-- ============================================================ -->
+    <!-- TAB: RIWAYAT                                                  -->
+    <!-- ============================================================ -->
     <div id="history-tab" class="tab-content">
         <div class="box">
             <div class="history-toolbar">
@@ -199,17 +212,17 @@ async def web_ui():
             </div>
         </div>
     </div>
-
-    <!-- ================================================== -->
-    <!-- Prism.js (syntax highlighting)                     -->
-    <!-- ================================================== -->
+    
+    <!-- ============================================================ -->
+    <!-- Prism.js (syntax highlighting)                                -->
+    <!-- ============================================================ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-
-    <!-- ================================================== -->
-    <!-- Aplikasi: modul JS terpisah (URUTAN PENTING!)      -->
-    <!-- ================================================== -->
+    
+    <!-- ============================================================ -->
+    <!-- Aplikasi: modul JS terpisah (URUTAN PENTING!)                 -->
+    <!-- ============================================================ -->
     <script src="/static/js/config.js"></script>
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/dom.js"></script>
