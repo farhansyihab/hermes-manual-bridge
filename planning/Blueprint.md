@@ -420,12 +420,12 @@ Fokus: Middleware otomatis parsing respons DeepSeek dan mengirim tool call ke He
   - [x] Implementasi fungsi `build_tool_call_response()` untuk bungkus ke format OpenAI tool call.
   - [x] Unit test untuk berbagai pola prompt dan respons (eksplisit, NL, fallback).
 
-- [ ] **Modul E: Sandbox Approval UI**
+- [x] **Modul E: Sandbox Approval UI**
   
   - [x] Tambahkan panel preview di Web UI yang muncul saat kode terdeteksi.
   - [x] Tampilkan informasi: nama file, **sumber path (Eksplisit/NL/Manual)**, bahasa, ukuran, isi kode.
-  - [ ] Implementasi tombol "Izinkan", "Edit & Izinkan", "Tolak".
-  - [ ] Implementasi editable preview (user bisa modifikasi kode sebelum approve).
+  - [x] Implementasi tombol "Izinkan", "Edit & Izinkan", "Tolak".
+  - [x] Implementasi editable preview (user bisa modifikasi kode sebelum approve).
 
 - [ ] **Keamanan & Fallback**
   
