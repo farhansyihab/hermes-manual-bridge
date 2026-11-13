@@ -1,17 +1,23 @@
 """
 Unit test untuk Modul D: Path Extractor (Fase 3)
 ==================================================
-
 Menguji fungsi-fungsi di path_extractor.py:
-    - extract_file_path_from_prompt()   : ekstrak path dengan hierarki 3 prioritas
-    - detect_path_source()              : indikator sumber path untuk UI
-    - validate_path()                   : validasi keamanan path
-    - extract_and_validate_path()       : kombinasi ekstraksi + validasi
+- extract_file_path_from_prompt()   : ekstrak path dengan hierarki 3 prioritas
+- detect_path_source()              : indikator sumber path untuk UI
+- validate_path()                   : validasi keamanan path
+- extract_and_validate_path()       : kombinasi ekstraksi + validasi + whitelist
 
-Catatan:
-    - Konstanta BT dan FENCE didefinisikan secara lokal untuk menghindari 
-      ImportError jika modul utama belum mengekspornya.
-    - Dijalankan dengan: pytest tests/test_path_extractor.py -v
+CATATAN PENTING (perbaikan ValueError: too many values to unpack):
+Sejak Fase 3 (Keamanan & Fallback), extract_and_validate_path() mengembalikan
+EMPAT nilai, bukan tiga:
+    (path, source, validation_error, warnings)
+Kontrak ini dipakai oleh app/routers/approval.py dan tests/test_whitelist.py,
+sehingga TIDAK boleh diubah. Test di file ini disesuaikan dengan kontrak baru.
+
+Catatan lain:
+- Konstanta BT dan FENCE didefinisikan secara lokal untuk menghindari
+  ImportError jika modul utama belum mengekspornya.
+- Dijalankan dengan: pytest tests/test_path_extractor.py -v
 """
 
 import pytest
@@ -167,27 +173,48 @@ class TestValidatePath:
 
 # ============================================================
 # TEST SUITE 4: extract_and_validate_path()
+# Kontrak Fase 3: return 4-tuple (path, source, error, warnings)
 # ============================================================
 class TestExtractAndValidatePath:
-    """Test suite untuk fungsi kombinasi ekstraksi + validasi."""
+    """Test suite untuk fungsi kombinasi ekstraksi + validasi + whitelist."""
+
+    def test_returns_four_values(self):
+        """Pastikan kontrak return tetap 4 nilai (dipakai approval.py)."""
+        result = extract_and_validate_path("[FILE: hello.py] Buat")
+        assert isinstance(result, tuple)
+        assert len(result) == 4
 
     def test_combined_valid_explicit(self):
-        path, source, error = extract_and_validate_path("[FILE: hello.py] Buat")
+        path, source, error, warnings = extract_and_validate_path("[FILE: hello.py] Buat")
         assert path == "hello.py"
         assert source == "explicit"
         assert error == ""
+        assert isinstance(warnings, list)
+        assert warnings == []
 
     def test_combined_invalid_absolute(self):
-        path, source, error = extract_and_validate_path("[FILE: /etc/passwd] Baca")
+        path, source, error, warnings = extract_and_validate_path("[FILE: /etc/passwd] Baca")
         assert path is None
         assert source == "explicit"
         assert "absolut" in error.lower()
+        # Path sudah ditolak di validasi dasar, tidak lanjut ke cek whitelist
+        assert warnings == []
 
     def test_combined_fallback_manual(self):
-        path, source, error = extract_and_validate_path("Buatkan script backup")
+        path, source, error, warnings = extract_and_validate_path("Buatkan script backup")
         assert path is None
         assert source == "manual"
         assert error == ""
+        assert warnings == []
+
+    def test_combined_valid_subdirectory(self):
+        path, source, error, warnings = extract_and_validate_path(
+            "[FILE: src/utils/helpers.py] Buatkan modul helper"
+        )
+        assert path == "src/utils/helpers.py"
+        assert source == "explicit"
+        assert error == ""
+        assert warnings == []
 
 
 # ============================================================
